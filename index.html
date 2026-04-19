@@ -40,7 +40,7 @@ import { getFirestore, collection, addDoc } from "https://www.gstatic.com/fireba
 
 // 🔥 Firebase Config
 const firebaseConfig = {
-  apiKey: "AIzaSyDmEcSkkLRf_DsXjafOySIV8tvg5fU1ZIM",
+  apiKey: "API_KEY_FIREBASE",
   authDomain: "activities-21d1f.firebaseapp.com",
   projectId: "activities-21d1f",
   storageBucket: "activities-21d1f.firebasestorage.app",
@@ -62,7 +62,7 @@ window.collection = collection;
 // 🔵 SUPABASE CONFIG
 const supabaseClient = window.supabase.createClient(
   "https://inisuencuxjknkweiwbj.supabase.co",
-  "sb_publishable_Av_I5DMPxPoU4pb3JWCbZw_gHepf1AA"
+  "API_KEY_PUBLISHED"
 );
 async function updateStudent() {
   const roll = document.getElementById("roll").value;
