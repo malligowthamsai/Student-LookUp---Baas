@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Student Lookup</title>
+
+<!-- Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+
+<style>
+body { font-family: Arial; padding: 30px; }
+input, button { padding: 10px; margin: 5px; }
+</style>
+</head>
+
+<body>
+
+<h2>Student Lookup</h2>
+<h1>Version 4 (Fixed)</h1>
+
+<input type="number" id="roll" placeholder="Enter Roll Number">
+<button onclick="searchStudent()">Search</button>
+<div id="result"></div>
+<button onclick="updateStudent()">Update Student</button>
+<hr>
+
+<h3>Add Student</h3>
+<input type="number" id="addRoll" placeholder="Roll Number">
+<input type="text" id="name" placeholder="Name">
+<input type="number" id="marks" placeholder="Marks">
+<button onclick="addStudent()">Add Student</button>
+
+<hr>
+<button onclick="testAll()">Test All</button>
+
+<!-- 🔥 Firebase v9 (MODULAR SDK - FIXED) -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+// 🔥 Firebase Config
+const firebaseConfig = {
+  apiKey: "AIzaSyDmEcSkkLRf_DsXjafOySIV8tvg5fU1ZIM",
+  authDomain: "activities-21d1f.firebaseapp.com",
+  projectId: "activities-21d1f",
+  storageBucket: "activities-21d1f.firebasestorage.app",
+  messagingSenderId: "237648610518",
+  appId: "1:237648610518:web:74bcff45b40d0a21257577"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// Make accessible globally
+window.db = db;
+window.addDoc = addDoc;
+window.collection = collection;
+</script>
+
+<script>
+// 🔵 SUPABASE CONFIG
+const supabaseClient = window.supabase.createClient(
+  "https://inisuencuxjknkweiwbj.supabase.co",
+  "sb_publishable_Av_I5DMPxPoU4pb3JWCbZw_gHepf1AA"
+);
+async function updateStudent() {
+  const roll = document.getElementById("roll").value;
+  const name = document.getElementById("name").value;
+  const marks = document.getElementById("marks").value;
+
+  if (!roll || !name || !marks) {
+    alert("Enter roll, name and marks to update");
+    return;
+  }
+
+  const { error } = await supabaseClient
+    .from("students")
+    .update({ name: name, marks: Number(marks) })
+    .eq("id", Number(roll));
+
+  if (!error) {
+    alert("Student updated!");
+    logActivity(roll, "updated student");
+  } else {
+    alert("Error: " + error.message);
+    console.error(error);
+  }
+}
+// 🔍 SEARCH STUDENT
+async function searchStudent() {
+  const roll = document.getElementById("roll").value;
+
+  if (!roll) {
+    alert("Enter roll number");
+    return;
+  }
+
+  const { data, error } = await supabaseClient
+    .from("students")
+    .select("*")
+    .eq("id", parseInt(roll))
+    .single();
+
+  if (error && error.code !== "PGRST116") {
+    document.getElementById("result").innerHTML =
+      "Error fetching data";
+    console.error(error);
+    return;
+  }
+
+  if (!data) {
+    document.getElementById("result").innerHTML =
+      "Student not found";
+    return;
+  }
+
+  document.getElementById("result").innerHTML =
+    `ID: ${data.id} <br>
+     Name: ${data.name} <br>
+     Marks: ${data.marks}`;
+
+  logActivity(roll, "checked details");
+  document.getElementById("name").value = data.name;
+document.getElementById("marks").value = data.marks;
+}
+
+// ➕ ADD STUDENT
+async function addStudent() {
+  const roll = document.getElementById("addRoll").value;
+  const name = document.getElementById("name").value;
+  const marks = document.getElementById("marks").value;
+
+  if (!roll || !name || !marks) {
+    alert("Please fill all fields");
+    return;
+  }
+
+  const { error } = await supabaseClient
+    .from("students")
+    .insert([
+      {
+        id: Number(roll),   // 👈 THIS is the roll number saved as ID
+        name: name,
+        marks: Number(marks)
+      }
+    ]);
+
+  if (!error) {
+    alert("Student added!");
+    logActivity(roll, "created student");
+    document.getElementById("addRoll").value = "";
+    document.getElementById("name").value = "";
+    document.getElementById("marks").value = "";
+  } else {
+    alert("Error: " + error.message);
+    console.error(error);
+  }
+}
+
+// 📝 FIREBASE LOGGING
+async function logActivity(roll, activity) {
+  await window.addDoc(window.collection(window.db, "activities"), {
+    roll: roll.toString(),
+    activity: activity,
+    time: new Date().toISOString()
+  });
+}
+
+// 🧪 TEST ALL DATA
+async function testAll() {
+  const { data, error } = await supabaseClient
+    .from("students")
+    .select("*");
+
+  console.log("ALL DATA:", data);
+  console.error("ERROR:", error);
+}
+</script>
+
+</body>
+</html>
